@@ -28,12 +28,17 @@ bool added(false);  //boolean to check if the link can be added
 
 size_t Network::random_connect(const double& mean_deg) {
 
-	links.clear(); //We destroy the map in order to refill it with some random connections
+	for (auto i : links) { //We destroy the map in order to refill it with some random connections
+		links.erase(i.first); 
+	}
+	
+        std::mt19937 toDist; //new int distribution in order not to use uniform_double
+        std::uniform_int_distribution<> unif(0,values.size()-1);
 	
 	for(size_t i(0); i < values.size(); ++i) {
 		size_t deg(RNG.poisson(mean_deg));
 		for(size_t j(0); j < deg; ++j) {
-			while(!add_link(i,RNG.uniform_double(0, values.size()))) continue;	
+				while(!add_link(i,unif(toDist))) continue;
 		}
 	}
  return links.size()/2; //We divide the size by 2 because each link created is bidirectional.
@@ -53,13 +58,8 @@ size_t Network::size() const {
 }
 
 size_t Network::degree(const size_t& n) const {
-	try {
 		
 		return links.count(n);
-		
-	} catch (std::out_of_range &e) {
-		std::cerr << "The element " << n << " does not exist" << std::endl;
-	}
 }
 
 double Network::value(const size_t & n) const {
